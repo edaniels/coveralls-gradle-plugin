@@ -109,7 +109,7 @@ class CoverallsTask extends DefaultTask {
 
 
 		def directory = this.project.projectDir
-		GitInfo gitInfo = GitInfoFactory.load directory
+		GitInfo gitInfo = GitInfoFactory.load(directory, this.env)
 		if (gitInfo == null) {
 			this.logger.warn "no git repo found in: " + directory
 		}

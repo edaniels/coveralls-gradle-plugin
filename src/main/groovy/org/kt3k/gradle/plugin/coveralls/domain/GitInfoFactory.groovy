@@ -14,13 +14,13 @@ class GitInfoFactory {
      * Create GitInfo instance from directory.
      *
      */
-    public static GitInfo load(File sourceDirectory) throws IOException {
+    public static GitInfo load(File sourceDirectory, Map<String, String> env) throws IOException {
         Repository repository = buildRepository(sourceDirectory)
         if (repository != null) {
             try {
                 return new GitInfo(
-                        head: getHead(repository),
-                        branch: getBranch(repository),
+                        head: getHead(repository, env),
+                        branch: env.get('CI_BRANCH') ?: getBranch(repository),
                         remotes: getRemotes(repository));
             } finally {
                 repository.close();
@@ -31,11 +31,11 @@ class GitInfoFactory {
 
     }
 
-    private static GitInfo.Head getHead(final Repository repository) throws IOException {
+    private static GitInfo.Head getHead(final Repository repository, Map<String, String> env) throws IOException {
         ObjectId revision = repository.resolve(Constants.HEAD);
         RevCommit commit = new RevWalk(repository).parseCommit(revision);
         GitInfo.Head head = new GitInfo.Head(
-                id: revision.getName(),
+                id: env.get('COVERALLS_GIT_COMMIT') ?: revision.getName(),
                 authorName: commit.getAuthorIdent().getName(),
                 authorEmail: commit.getAuthorIdent().getEmailAddress(),
                 committerName: commit.getCommitterIdent().getName(),
