@@ -1,3 +1,9 @@
+buildscript {
+    dependencies {
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.0'
+    }
+}
+
 plugins {
     id "groovy"
     id "maven"
@@ -6,11 +12,12 @@ plugins {
     id "signing"
     id "maven-publish"
     id "jacoco"
-    id "com.jfrog.bintray" version "1.4"
     id "com.github.kt3k.coveralls" version "2.5.0"
 }
 
-group 'org.kt3k.gradle.plugin'
+apply plugin: 'com.jfrog.bintray'
+
+group 'org.edaniels.gradle.plugin'
 version '2.8.2'
 
 repositories {
@@ -138,23 +145,31 @@ publishing {
 }
 
 
+Properties properties = new Properties()
+File file = project.rootProject.file('local.properties')
+if (file.exists()) {
+    properties.load(project.rootProject.file('local.properties').newDataInputStream())
+}
+
+def bintrayUser = properties.getProperty("publish.bintray.user", "")
+def apiKey = properties.getProperty("publish.bintray.apiKey", "")
+def gpgPassphrase = properties.getProperty("publish.bintray.gpgPassphrase", "")
+def bintrayMavenSyncUser = properties.getProperty("publish.bintray.mavenSyncUser", "")
+def mavenSyncPassword = properties.getProperty("publish.bintray.mavenSyncPassword", "")
+
 bintray {
-
-    if (project.hasProperty('bintray.username')) {
-        // these two should be defined out of the repository, for example, in ~/.gradle/gradle.properties
-        user = project.'bintray.username'
-        key = project.'bintray.apiKey'
-    }
-
-    publications = ['plugin']
-
+    user = bintrayUser
+    key = apiKey
+    publish = true
+    override = true
     pkg {
         repo = 'gradle-plugins'
         name = 'coveralls-gradle-plugin'
+        userOrg = 'edaniels'
         desc = 'Send coverage data to coveralls.io.'
-        websiteUrl = 'https://github.com/kt3k/coveralls-gradle-plugin'
-        issueTrackerUrl = 'https://github.com/kt3k/coveralls-gradle-plugin/issues'
-        vcsUrl = 'https://github.com/kt3k/coveralls-gradle-plugin.git'
+        websiteUrl = 'https://github.com/edaneils/coveralls-gradle-plugin'
+        issueTrackerUrl = 'https://github.com/edaneils/coveralls-gradle-plugin/issues'
+        vcsUrl = 'https://github.com/edaneils/coveralls-gradle-plugin.git'
         licenses = ['MIT']
         labels = ['coveralls', 'coverage']
         publicDownloadNumbers = true
@@ -162,9 +177,24 @@ bintray {
             name = '2.8.2'
             vcsTag = 'v2.8.2'
             attributes = [
-                'gradle-plugin': 'com.github.kt3k.coveralls:org.kt3k.gradle.plugin:coveralls-gradle-plugin'
+                'gradle-plugin': 'com.github.kt3k.coveralls:org.edaniels.gradle.plugin:coveralls-gradle-plugin'
             ]
+            released  = new Date()
+            if (!gpgPassphrase.isEmpty()) {
+                gpg {
+                    sign = true
+                    passphrase = gpgPassphrase
+                }
+            }
+            if (!bintrayMavenSyncUser.isEmpty()) {
+                mavenCentralSync {
+                    sync = false
+                    user = bintrayMavenSyncUser
+                    password = mavenSyncPassword
+                    close = '1'
+                }
+            }
         }
     }
-
+    publications = ['plugin']
 }

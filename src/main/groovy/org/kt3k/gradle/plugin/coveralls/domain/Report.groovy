@@ -16,12 +16,13 @@ class Report {
     List<SourceReport> source_files
     Map<String, String> environment
     GitInfo git
+    Boolean parallel
 
     public Report(ServiceInfo serviceInfo, List<SourceReport> sourceFiles) {
         this(serviceInfo, sourceFiles, null)
     }
 
-    public Report(ServiceInfo serviceInfo, List<SourceReport> sourceFiles, GitInfo git) {
+    public Report(ServiceInfo serviceInfo, List<SourceReport> sourceFiles, GitInfo git, Boolean parallel) {
         this.service_name = serviceInfo.serviceName
         this.service_number = serviceInfo.serviceNumber
         this.service_build_url = serviceInfo.serviceBuildUrl
@@ -32,6 +33,7 @@ class Report {
         this.environment = serviceInfo.environment
         this.source_files = sourceFiles
         this.git = git
+        this.parallel = parallel
     }
 
     public String toJson() {

@@ -146,7 +146,9 @@ class CoverallsTask extends DefaultTask {
 			return
 		}
 
-		Report rep = new Report(serviceInfo, sourceReports, gitInfo)
+		Boolean parallel = this.env.containsKey('COVERALLS_PARALLEL') ? this.env.get('COVERALLS_PARALLEL').toBoolean() : false
+
+		Report rep = new Report(serviceInfo, sourceReports, gitInfo, parallel)
 
 		String json = rep.toJson()
 		this.logger.info json
